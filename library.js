@@ -1,25 +1,19 @@
 'use strict';
 
-// Works on every NodeBB version: newer cores expose a global `nodebb.require`,
-// older ones only support `require.main.require`.
-const nodebbRequire = (typeof nodebb !== 'undefined' && nodebb && typeof nodebb.require === 'function') ?
-	nodebb.require.bind(nodebb) :
-	require.main.require.bind(require.main);
+const meta = nodebb.require('./src/meta');
+const user = nodebb.require('./src/user');
+const posts = nodebb.require('./src/posts');
+const topics = nodebb.require('./src/topics');
+const messaging = nodebb.require('./src/messaging');
+const privileges = nodebb.require('./src/privileges');
+const db = nodebb.require('./src/database');
+const translator = nodebb.require('./src/translator');
+const notifications = nodebb.require('./src/notifications');
+const routesHelpers = nodebb.require('./src/routes/helpers');
+const websockets = nodebb.require('./src/socket.io/index');
+const SocketPlugins = nodebb.require('./src/socket.io/plugins');
 
-const meta = nodebbRequire('./src/meta');
-const user = nodebbRequire('./src/user');
-const posts = nodebbRequire('./src/posts');
-const topics = nodebbRequire('./src/topics');
-const messaging = nodebbRequire('./src/messaging');
-const privileges = nodebbRequire('./src/privileges');
-const db = nodebbRequire('./src/database');
-const translator = nodebbRequire('./src/translator');
-const notifications = nodebbRequire('./src/notifications');
-const routesHelpers = nodebbRequire('./src/routes/helpers');
-const websockets = nodebbRequire('./src/socket.io/index');
-const SocketPlugins = nodebbRequire('./src/socket.io/plugins');
-
-const emojiParser = nodebbRequire('nodebb-plugin-emoji/build/lib/parse.js');
+const emojiParser = nodebb.require('nodebb-plugin-emoji/build/lib/parse.js');
 
 let emojiTable = null;
 let emojiAliases = null;
@@ -31,17 +25,23 @@ const MAX_USERS_IN_FULL_LIST = 200;
 
 function nameToEmoji(name) {
 	if (!emojiTable) {
-		emojiTable = nodebbRequire('nodebb-plugin-emoji/build/emoji/table.json');
+		emojiTable = nodebb.require('nodebb-plugin-emoji/build/emoji/table.json');
 	}
 	return emojiTable[name];
 }
 
 function parse(name) {
 	if (!emojiAliases) {
-		emojiAliases = nodebbRequire('nodebb-plugin-emoji/build/emoji/aliases.json');
+		emojiAliases = nodebb.require('nodebb-plugin-emoji/build/emoji/aliases.json');
 	}
 	const emoji = nameToEmoji(name) || emojiTable[emojiAliases[name]];
 	return emoji ? emojiParser.buildEmoji(emoji, '') : '';
+}
+
+async function requireAdmin(socket) {
+	if (!socket.uid || !(await user.isAdministrator(socket.uid))) {
+		throw new Error('[[error:no-privileges]]');
+	}
 }
 
 const ReactionsPlugin = module.exports;
@@ -497,6 +497,17 @@ async function getReactionSetKey(socket, data) {
 }
 
 SocketPlugins.reactions = {
+	// Setting for NodeBB's built-in upvote, shown on the core page "Settings > Reputation" (see public/acp-reputation.js).
+	getUnvoteSetting: async function (socket) {
+		await requireAdmin(socket);
+		const settings = await loadPluginConfig();
+		return { enabled: settings.deleteNotificationOnUnvote };
+	},
+	setUnvoteSetting: async function (socket, data) {
+		await requireAdmin(socket);
+		await meta.settings.setOne('reactions', 'deleteNotificationOnUnvote', data && data.enabled ? 'on' : 'off');
+		return { enabled: !!(data && data.enabled) };
+	},
 	addPostReaction: async function (socket, data) {
 		if (!socket.uid) {
 			throw new Error('[[error:not-logged-in]]');

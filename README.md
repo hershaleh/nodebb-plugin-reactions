@@ -1,37 +1,64 @@
-> Based on [ClickAndGoScript/nodebb-plugin-reactions](https://github.com/ClickAndGoScript/nodebb-plugin-reactions) (MIT).
-> Changes in this version: post authors can't react to their own post (optional ACP setting),
-> long-press popup with the reactors on touch devices, a full reactors list, and reaction
-> notifications merged per emoji.
-
 # nodebb-plugin-reactions
-Reactions plugin for NodeBB
 
-This plugin requires nodebb-plugin-emoji to be active.
+Emoji reactions for NodeBB posts and chat messages.
 
-# Installation
-Install via one-click activation in the Admin Control Panel or run the following command:
+This is a fork of [ClickAndGoScript/nodebb-plugin-reactions](https://github.com/ClickAndGoScript/nodebb-plugin-reactions) (MIT). It contains everything from the original plugin plus the changes listed under [What's different from the original](#whats-different-from-the-original).
 
-    npm i git+https://github.com/ClickAndGoScript/nodebb-plugin-reactions
+This plugin requires `nodebb-plugin-emoji` to be active.
 
-# Behavior
+## Installation
 
-- Post authors can't react to their own posts (can be allowed in the ACP: "Allow users to react to their own posts"). Reacting to your own post never gives reaction reputation.
-- Hover (desktop) or long-press (touch devices) on a reaction shows who reacted. On touch devices the popup stays open until you tap somewhere else.
-- Right-click (desktop) on a reaction, or "Show everyone" in the touch popup, opens the full list of users.
-- Several users reacting with the same emoji to the same post or chat message are merged into a single notification. Different emojis on the same post keep separate notifications.
-- Built-in forum upvote ("like"): when it is removed, the author's notification is deleted too (ACP, block "Notifications": "Delete the notification when the forum's built-in upvote is removed"; on by default).
-- Reaction notifications show the emoji as an image (not the `:name:` text).
-- When a user removes their reaction, the notification that was sent to the author for it is deleted. Controlled by the ACP switch "Delete the notification when the reaction is removed" (block "Notifications", applies to posts and chats; on by default).
+    npm i git+https://github.com/hershaleh/nodebb-plugin-reactions
 
-# Emojis in Topic Titles and Notifications
+Then activate the plugin in the Admin Control Panel (Extend > Plugins), and run **Rebuild & Restart**.
 
-In the admin settings of nodebb-plugin-emoji, turn on "Parse emojis in topic titles" to see emojis as images in topic titles and notifications.
-![](https://private-user-images.githubusercontent.com/2583394/586759879-5b4e6cc9-3568-48fa-a556-83bdb24bd8f2.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Nzc3NDAwNzAsIm5iZiI6MTc3NzczOTc3MCwicGF0aCI6Ii8yNTgzMzk0LzU4Njc1OTg3OS01YjRlNmNjOS0zNTY4LTQ4ZmEtYTU1Ni04M2JkYjI0YmQ4ZjIucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI2MDUwMiUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNjA1MDJUMTYzNjEwWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NmJkY2ZhZDE0N2ZiMzRjODMyOGM2ODg1NTlkNWU1NDg5ZmEyNGI1MzlkYjg4ODZlNDFjZWUzNmU0Zjk0ZDUwMCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmcmVzcG9uc2UtY29udGVudC10eXBlPWltYWdlJTJGcG5nIn0.PoBRMpH7ByDbA-uXoyHAoHFr3eiiN4IYy-Wvqy3p2pM)
+The package keeps the original name (`@clickandgo/nodebb-plugin-reactions`), so it can replace the original plugin in place. If you install it manually, it must live in `node_modules/@clickandgo/nodebb-plugin-reactions`.
 
-# Screenshots
+## Screenshots
 
-## Reactions:
+### Reactions
+
 ![demo](./assets/demo.png)
 
-## ACP:
-![acp](./assets/acp.png)
+### Plugin settings (ACP > Plugins > Reactions)
+
+![Reactions settings](./assets/acp-reactions.png)
+
+### Built-in upvote switch (ACP > Settings > Reputation & Flags)
+
+![Reputation settings](./assets/acp-reputation.png)
+
+## What's different from the original
+
+- **No self-reactions.** Post authors can't react to their own posts. This can be turned off in the plugin settings ("Allow users to react to their own posts"). A reaction on your own post never gives reaction reputation and never sends a notification.
+- **Reactors on touch devices.** There is no hover on Android/iOS, so a long press on a reaction opens a popup that lists who reacted (styled like the desktop tooltip). The popup stays open until you tap somewhere else, so it survives the browser's "image options" dialog.
+- **Full list of reactors.** Right-click (desktop) on a reaction, or "Show everyone" in the touch popup, opens the complete list of users.
+- **Merged notifications, per emoji.** Several users reacting with the *same* emoji to the same post or chat message are merged into one notification ("A and 3 others reacted with 😄 to your post"). Different emojis on the same post keep separate notifications.
+- **Emoji images in notifications.** Reaction notifications show the emoji as an image instead of the `:name:` text (also for older notifications and merged ones).
+- **Notification is deleted when a reaction is removed.** When a user takes back their emoji reaction, the notification sent to the author is deleted. Switch: *Plugin settings > Notifications > "Delete the notification when the reaction is removed"* (applies to posts and chats, on by default).
+- **Notification is deleted when a built-in upvote is removed.** This is about NodeBB's own upvote ("like") button, not the emoji reactions. Switch: *ACP > Settings > Reputation & Flags > "Delete the notification when an upvote ("like") is removed"* (on by default). It is saved immediately, without the page's Save button.
+- **Many reactions stay on screen.** The reactions row wraps onto new lines and never grows wider than the screen or its column, on desktop and mobile.
+- **Complete Hebrew translation** of the admin panel and notification type (other languages fall back to English for the new strings).
+
+## Emojis in topic titles and notifications
+
+To see emojis as images in topic titles and notifications from other plugins, turn on "Parse emojis in topic titles" in the settings of `nodebb-plugin-emoji`.
+
+## Settings
+
+| Setting | What it does |
+| --- | --- |
+| Enable post reactions | Turns reactions on posts on or off. |
+| Maximum unique reactions per post | How many different emojis one post can have (0 = unlimited, default 4). |
+| Maximum reactions per user per post | How many emojis one user can put on a post (0 = unlimited). Only enforced when adding a new emoji, not when joining an existing one. |
+| Allow users to react to their own posts | Off by default. |
+| Enable message reactions | Turns reactions on chat messages on or off. |
+| Maximum unique reactions per message | Same as for posts, for chat messages. |
+| Maximum reactions per user per message | Same as for posts, for chat messages. |
+| Delete the notification when the reaction is removed | See above. |
+| Allowed post reactions | Restricts which emojis can be used on posts. Empty = all emojis. Does not affect chats. |
+| Reaction reputations | Gives the post author reputation when a specific emoji is used on their post; taken back when the reaction is removed. |
+
+## License
+
+MIT, see [LICENSE](./LICENSE).

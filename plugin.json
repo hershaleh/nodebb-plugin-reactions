@@ -1,8 +1,8 @@
 {
-    "id": "@clickandgo/nodebb-plugin-reactions",
+    "id": "nodebb-plugin-reactions",
     "name": "NodeBB Reactions",
     "description": "Reactions plugin for NodeBB",
-    "url": "https://github.com/ClickAndGoScript/nodebb-plugin-reactions",
+    "url": "https://github.com/hershaleh/nodebb-plugin-reactions",
     "library": "./library.js",
     "templates": "templates",
     "languages": "languages",
@@ -11,6 +11,9 @@
     ],
     "scripts": [
         "public/client.js"
+    ],
+    "acpScripts": [
+        "public/acp-reputation.js"
     ],
     "modules": {
         "../admin/plugins/reactions.js": "./public/admin.js"
