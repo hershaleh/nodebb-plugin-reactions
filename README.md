@@ -22,9 +22,13 @@ The package keeps the original name (`@clickandgo/nodebb-plugin-reactions`), so 
 
 ### Plugin settings (ACP > Plugins > Reactions)
 
+Red frames mark what this fork adds.
+
 ![Reactions settings](./assets/acp-reactions.png)
 
 ### Built-in upvote switch (ACP > Settings > Reputation & Flags)
+
+Red frame marks what this fork adds.
 
 ![Reputation settings](./assets/acp-reputation.png)
 
@@ -43,21 +47,6 @@ The package keeps the original name (`@clickandgo/nodebb-plugin-reactions`), so 
 ## Emojis in topic titles and notifications
 
 To see emojis as images in topic titles and notifications from other plugins, turn on "Parse emojis in topic titles" in the settings of `nodebb-plugin-emoji`.
-
-## Settings
-
-| Setting | What it does |
-| --- | --- |
-| Enable post reactions | Turns reactions on posts on or off. |
-| Maximum unique reactions per post | How many different emojis one post can have (0 = unlimited, default 4). |
-| Maximum reactions per user per post | How many emojis one user can put on a post (0 = unlimited). Only enforced when adding a new emoji, not when joining an existing one. |
-| Allow users to react to their own posts | Off by default. |
-| Enable message reactions | Turns reactions on chat messages on or off. |
-| Maximum unique reactions per message | Same as for posts, for chat messages. |
-| Maximum reactions per user per message | Same as for posts, for chat messages. |
-| Delete the notification when the reaction is removed | See above. |
-| Allowed post reactions | Restricts which emojis can be used on posts. Empty = all emojis. Does not affect chats. |
-| Reaction reputations | Gives the post author reputation when a specific emoji is used on their post; taken back when the reaction is removed. |
 
 ## License
 
