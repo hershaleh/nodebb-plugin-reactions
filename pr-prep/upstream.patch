@@ -1,0 +1,1179 @@
+diff --git a/README.md b/README.md
+index 3f13112..9601fc5 100644
+--- a/README.md
++++ b/README.md
+@@ -8,6 +8,16 @@ Install via one-click activation in the Admin Control Panel or run the following
+ 
+     npm i git+https://github.com/ClickAndGoScript/nodebb-plugin-reactions
+ 
++# Behavior
++
++- Post authors can't react to their own posts (can be allowed in the ACP: "Allow users to react to their own posts"). Reacting to your own post never gives reaction reputation.
++- Hover (desktop) or long-press (touch devices) on a reaction shows who reacted. On touch devices the popup stays open until you tap somewhere else.
++- Right-click (desktop) on a reaction, or "Show everyone" in the touch popup, opens the full list of users.
++- Several users reacting with the same emoji to the same post or chat message are merged into one notification. Different emojis keep separate notifications. Notifications show the emoji as an image.
++- When a user removes their reaction, the notification sent to the author is deleted (ACP switch, on by default).
++- When a built-in upvote is removed, the author's notification is deleted too (switch on ACP > Settings > Reputation & Flags, on by default).
++- The reactions row wraps onto new lines and never grows wider than the screen.
++
+ # Emojis in Topic Titles and Notifications
+ 
+ In the admin settings of nodebb-plugin-emoji, turn on "Parse emojis in topic titles" to see emojis as images in topic titles and notifications.
+diff --git a/languages/en-GB/reactions.json b/languages/en-GB/reactions.json
+index bb347a0..13a94b3 100644
+--- a/languages/en-GB/reactions.json
++++ b/languages/en-GB/reactions.json
+@@ -8,12 +8,17 @@
+ 	"error.post-reactions-disabled": "Post reactions are disabled",
+ 	"error.post-deleted": "This post has been deleted",
+ 	"error.message-reactions-disabled": "Message reactions are disabled",
++	"error.cannot-react-own-post": "You cannot react to your own post",
+ 	"error.reaction-not-allowed": "This reaction is not allowed",
++	"users-who-reacted": "Who reacted",
++	"show-all-users": "Show everyone",
+ 	"settings.title": "Reactions plugin settings",
+ 	"settings.enable-post-reactions": "Enable post reactions",
+ 	"settings.max-reactions-per-post": "Maximum unique reactions per post (0 for unlimited, default: 4)",
+ 	"settings.max-reactions-per-user-per-post": "Maximum reactions per user per post (0 for unlimited)",
+ 	"settings.max-reactions-per-user-per-post-help": "The limit is enforced only when adding a new reaction and not when joining an existing reaction.",
++	"settings.allow-self-reactions": "Allow users to react to their own posts",
++	"settings.allow-self-reactions-help": "By default post authors cannot add reactions to their own posts. Reacting to your own post never gives reaction reputation.",
+ 	"settings.enable-message-reactions": "Enable message reactions",
+ 	"settings.max-reactions-per-message": "Maximum unique reactions per message (0 for unlimited, default: 4)",
+ 	"settings.max-reactions-per-user-per-message": "Maximum reactions per user per message (0 for unlimited)",
+@@ -29,6 +34,19 @@
+ 	"settings.reaction-reputations.reputation": "Reputation",
+ 	"settings.reaction-reputations.remove": "Delete",
+ 	"settings.reaction-reputations.edit": "Edit",
++	"settings.saved-title": "Settings Saved",
++	"settings.saved-message": "Reactions plugin settings saved",
++	"settings.notifications-title": "Notifications",
++	"settings.delete-notification-on-remove": "Delete the notification when the reaction is removed",
++	"settings.delete-notification-on-remove-help": "When a user takes back an emoji reaction, the notification that was sent to the author is deleted. Turn this off to keep the notification even after the reaction was removed. Applies to posts and chat messages.",
++	"settings.delete-notification-on-unvote": "Delete the notification when an upvote (\"like\") is removed",
++	"settings.delete-notification-on-unvote-help": "When a user takes back their upvote on a post, the notification the author received for it is deleted. Saved immediately (no need to press Save). Added by the Reactions plugin.",
+ 	"notification.user-has-reacted-with-to-your-post-in-topic": "<strong>%1</strong> has reacted with %2 to your post in <strong>%3</strong>",
+-	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>"
++	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic": "<strong>%1</strong> has reacted with %2 to your post in <strong>%3</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-two": "<strong>%1</strong> and <strong>%2</strong> have reacted with %3 to your post in <strong>%4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-multiple": "<strong>%1</strong> and %2 others have reacted with %3 to your post in <strong>%4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-two": "<strong>%1</strong> and <strong>%2</strong> have reacted with %3 to your message in <strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-multiple": "<strong>%1</strong> and %2 others have reacted with %3 to your message in <strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>"
+ }
+diff --git a/languages/en-US/reactions.json b/languages/en-US/reactions.json
+index bb347a0..13a94b3 100644
+--- a/languages/en-US/reactions.json
++++ b/languages/en-US/reactions.json
+@@ -8,12 +8,17 @@
+ 	"error.post-reactions-disabled": "Post reactions are disabled",
+ 	"error.post-deleted": "This post has been deleted",
+ 	"error.message-reactions-disabled": "Message reactions are disabled",
++	"error.cannot-react-own-post": "You cannot react to your own post",
+ 	"error.reaction-not-allowed": "This reaction is not allowed",
++	"users-who-reacted": "Who reacted",
++	"show-all-users": "Show everyone",
+ 	"settings.title": "Reactions plugin settings",
+ 	"settings.enable-post-reactions": "Enable post reactions",
+ 	"settings.max-reactions-per-post": "Maximum unique reactions per post (0 for unlimited, default: 4)",
+ 	"settings.max-reactions-per-user-per-post": "Maximum reactions per user per post (0 for unlimited)",
+ 	"settings.max-reactions-per-user-per-post-help": "The limit is enforced only when adding a new reaction and not when joining an existing reaction.",
++	"settings.allow-self-reactions": "Allow users to react to their own posts",
++	"settings.allow-self-reactions-help": "By default post authors cannot add reactions to their own posts. Reacting to your own post never gives reaction reputation.",
+ 	"settings.enable-message-reactions": "Enable message reactions",
+ 	"settings.max-reactions-per-message": "Maximum unique reactions per message (0 for unlimited, default: 4)",
+ 	"settings.max-reactions-per-user-per-message": "Maximum reactions per user per message (0 for unlimited)",
+@@ -29,6 +34,19 @@
+ 	"settings.reaction-reputations.reputation": "Reputation",
+ 	"settings.reaction-reputations.remove": "Delete",
+ 	"settings.reaction-reputations.edit": "Edit",
++	"settings.saved-title": "Settings Saved",
++	"settings.saved-message": "Reactions plugin settings saved",
++	"settings.notifications-title": "Notifications",
++	"settings.delete-notification-on-remove": "Delete the notification when the reaction is removed",
++	"settings.delete-notification-on-remove-help": "When a user takes back an emoji reaction, the notification that was sent to the author is deleted. Turn this off to keep the notification even after the reaction was removed. Applies to posts and chat messages.",
++	"settings.delete-notification-on-unvote": "Delete the notification when an upvote (\"like\") is removed",
++	"settings.delete-notification-on-unvote-help": "When a user takes back their upvote on a post, the notification the author received for it is deleted. Saved immediately (no need to press Save). Added by the Reactions plugin.",
+ 	"notification.user-has-reacted-with-to-your-post-in-topic": "<strong>%1</strong> has reacted with %2 to your post in <strong>%3</strong>",
+-	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>"
++	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic": "<strong>%1</strong> has reacted with %2 to your post in <strong>%3</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-two": "<strong>%1</strong> and <strong>%2</strong> have reacted with %3 to your post in <strong>%4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-multiple": "<strong>%1</strong> and %2 others have reacted with %3 to your post in <strong>%4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room": "<strong>%1</strong> has reacted with %2 to your message in <strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-two": "<strong>%1</strong> and <strong>%2</strong> have reacted with %3 to your message in <strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-multiple": "<strong>%1</strong> and %2 others have reacted with %3 to your message in <strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>"
+ }
+diff --git a/languages/he/notifications.json b/languages/he/notifications.json
+new file mode 100644
+index 0000000..33fd071
+--- /dev/null
++++ b/languages/he/notifications.json
+@@ -0,0 +1,3 @@
++{
++	"notificationType-reaction": "כשמישהו מגיב לפוסטים ולצ'אטים שלך"
++}
+diff --git a/languages/he/reactions.json b/languages/he/reactions.json
+index 5f7c3ba..83747c3 100644
+--- a/languages/he/reactions.json
++++ b/languages/he/reactions.json
+@@ -1,5 +1,5 @@
+ {
+-	"reactions": "Reactions",
++	"reactions": "תגובות",
+ 	"add-reaction": "הוסף תגובה",
+ 	"error.invalid-reaction": "תגובה לא חוקית",
+ 	"error.maximum-reached": "הגעת למספר התגובות המקסימלי לפוסט %1",
+@@ -8,11 +8,16 @@
+ 	"error.post-reactions-disabled": "תגובות לפוסט מושבתו",
+ 	"error.post-deleted": "לא ניתן להגיב על פוסט שנמחק",
+ 	"error.message-reactions-disabled": "תגובות להודעה מושבתו",
++	"error.cannot-react-own-post": "לא ניתן להגיב על הפוסט של עצמך",
+ 	"error.reaction-not-allowed": "תגובה זו אינה מורשית",
++	"users-who-reacted": "מי הגיב",
++	"show-all-users": "הצג את כולם",
+ 	"settings.title": "הגדרות תגובות",
+ 	"settings.max-reactions-per-post": "מספר התגובות המקסימלי לפוסט (0 = ללא הגבלה, ברירת מחדל: 4)",
+ 	"settings.max-reactions-per-user-per-post": "מספר התגובות המקסימלי למשתמש לפוסט (0 = ללא הגבלה)",
+ 	"settings.max-reactions-per-user-per-post-help": ".ההגבלה נאכפת רק בהוספת תגובה חדשה ולא בהצטרפות לתגובה קיימת",
++	"settings.allow-self-reactions": "אפשר למשתמשים להגיב על הפוסטים של עצמם",
++	"settings.allow-self-reactions-help": "כברירת מחדל, בעל הפוסט לא יכול להוסיף תגובת אמוג'י לפוסט של עצמו. תגובה לפוסט של עצמך אף פעם לא מזכה במוניטין.",
+ 	"settings.allowed-post-reactions": "אימוג'ים מורשים לתגובה על פוסטים (אופציונלי)",
+ 	"settings.allowed-post-reactions-help": "הגבל את האימוג'ים שניתן להשתמש בהם כתגובה על פוסטים. השאר ריק כדי לאפשר את כל האימוג'ים. לא משפיע על תגובות בהודעות צ'אט.",
+ 	"settings.allowed-post-reactions.add": "הוסף אימוג'י",
+@@ -24,6 +29,24 @@
+ 	"settings.reaction-reputations.reputation": "מוניטין",
+ 	"settings.reaction-reputations.remove": "הסרה",
+ 	"settings.reaction-reputations.edit": "עריכה",
++	"settings.enable-post-reactions": "הפעל תגובות לפוסטים",
++	"settings.enable-message-reactions": "הפעל תגובות להודעות",
++	"settings.max-reactions-per-message": "מספר התגובות הייחודיות המקסימלי להודעה (0 = ללא הגבלה, ברירת מחדל: 4)",
++	"settings.max-reactions-per-user-per-message": "מספר התגובות המקסימלי למשתמש להודעה (0 = ללא הגבלה)",
++	"settings.max-reactions-per-user-per-message-help": "ההגבלה נאכפת רק בהוספת תגובה חדשה ולא בהצטרפות לתגובה קיימת.",
++	"settings.saved-title": "ההגדרות נשמרו",
++	"settings.saved-message": "הגדרות תוסף התגובות נשמרו",
++	"settings.notifications-title": "התראות",
++	"settings.delete-notification-on-remove": "מחק את ההתראה כשהתגובה (האמוג'י) הוסרה",
++	"settings.delete-notification-on-remove-help": "כשמשתמש מסיר את תגובת האמוג'י שלו, ההתראה שנשלחה לבעל הפוסט נמחקת. כבה כדי להשאיר את ההתראה גם אחרי שהתגובה הוסרה. חל על פוסטים ועל הודעות צ'אט.",
++	"settings.delete-notification-on-unvote": "מחק את ההתראה כשלייק (הצבעה בעד) מבוטל",
++	"settings.delete-notification-on-unvote-help": "כשמשתמש מבטל את הלייק שלו על פוסט, ההתראה שבעל הפוסט קיבל עליו נמחקת. נשמר מיד (אין צורך ללחוץ שמירה). נוסף על ידי תוסף התגובות.",
+ 	"notification.user-has-reacted-with-to-your-post-in-topic": "<strong>%1</strong> הגיב עם %2 לפוסט שלך ב<strong>%3</strong>",
+-	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> הגיב עם %2 להודעה שלך ב<strong class=\"text-nowrap \"><i class=\"fa %3\"></i>%4</strong>"
++	"notification.user-has-reacted-with-to-your-message-in-room": "<strong>%1</strong> הגיב עם %2 להודעה שלך ב<strong class=\"text-nowrap \"><i class=\"fa %3\"></i>%4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic": "<strong>%1</strong> הגיב עם %2 לפוסט שלך ב<strong>%3</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-two": "<strong>%1</strong> ו<strong>%2</strong> הגיבו עם %3 לפוסט שלך ב<strong>%4</strong>",
++	"notification.user-has-reacted-to-your-post-in-topic-multiple": "<strong>%1</strong> ועוד %2 הגיבו עם %3 לפוסט שלך ב<strong>%4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room": "<strong>%1</strong> הגיב עם %2 להודעה שלך ב<strong class=\"text-nowrap\"><i class=\"fa %3\"></i> %4</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-two": "<strong>%1</strong> ו<strong>%2</strong> הגיבו עם %3 להודעה שלך ב<strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>",
++	"notification.user-has-reacted-to-your-message-in-room-multiple": "<strong>%1</strong> ועוד %2 הגיבו עם %3 להודעה שלך ב<strong class=\"text-nowrap\"><i class=\"fa %4\"></i> %5</strong>"
+ }
+diff --git a/library.js b/library.js
+index 243594a..6644c91 100644
+--- a/library.js
++++ b/library.js
+@@ -19,6 +19,9 @@ let emojiTable = null;
+ let emojiAliases = null;
+ 
+ const DEFAULT_MAX_EMOTES = 4;
++const POST_MERGE_ID = 'reactions-post';
++const MESSAGE_MERGE_ID = 'reactions-message';
++const MAX_USERS_IN_FULL_LIST = 200;
+ 
+ function nameToEmoji(name) {
+ 	if (!emojiTable) {
+@@ -35,6 +38,12 @@ function parse(name) {
+ 	return emoji ? emojiParser.buildEmoji(emoji, '') : '';
+ }
+ 
++async function requireAdmin(socket) {
++	if (!socket.uid || !(await user.isAdministrator(socket.uid))) {
++		throw new Error('[[error:no-privileges]]');
++	}
++}
++
+ const ReactionsPlugin = module.exports;
+ 
+ ReactionsPlugin.init = async function (params) {
+@@ -62,6 +71,7 @@ ReactionsPlugin.getPluginConfig = async function (config) {
+ 	config.maximumReactionsPerUserPerMessage = settings.maximumReactionsPerUserPerMessage;
+ 
+ 	config.enablePostReactions = settings.enablePostReactions;
++	config.allowSelfReactions = settings.allowSelfReactions;
+ 	config.enableMessageReactions = settings.enableMessageReactions;
+ 	config.allowedPostReactions = settings.allowedPostReactions;
+ 	return config;
+@@ -83,6 +93,10 @@ async function loadPluginConfig() {
+ 
+ 	settings.enablePostReactions = settings.enablePostReactions === 'on';
+ 	settings.enableMessageReactions = settings.enableMessageReactions === 'on';
++	settings.allowSelfReactions = settings.allowSelfReactions === 'on';
++	// absent = on (previous behaviour); only an explicit 'off' disables them
++	settings.deleteNotificationOnRemove = settings.deleteNotificationOnRemove !== 'off';
++	settings.deleteNotificationOnUnvote = settings.deleteNotificationOnUnvote !== 'off';
+ 	settings.allowedPostReactions = Array.isArray(settings['allowed-post-reactions']) ?
+ 		settings['allowed-post-reactions'].map(r => r && r.reaction).filter(Boolean) : [];
+ 	return settings;
+@@ -97,10 +111,114 @@ ReactionsPlugin.filterSettingsGet = async function (hookData) {
+ 		if (!values.hasOwnProperty('enableMessageReactions')) {
+ 			values.enableMessageReactions = 'on';
+ 		}
++		if (!values.hasOwnProperty('deleteNotificationOnRemove')) {
++			values.deleteNotificationOnRemove = 'on';
++		}
++		if (!values.hasOwnProperty('deleteNotificationOnUnvote')) {
++			values.deleteNotificationOnUnvote = 'on';
++		}
+ 	}
+ 	return hookData;
+ };
+ 
++// Several users reacting with the SAME emoji to the same post / message become one notification:
++// "A and 3 others have reacted with :smile: to your post in <topic>".
++// Different emojis on the same post stay separate notifications.
++ReactionsPlugin.mergeReactionNotifications = async function (data) {
++	if (!data || !Array.isArray(data.notifications)) {
++		return data;
++	}
++	const groups = new Map(); // `${mergeId}::${emoji}` -> notifications (only the same emoji on the same post/message is merged)
++	data.notifications.forEach((notif) => {
++		if (notif && notif.type === 'reaction' && typeof notif.mergeId === 'string' &&
++			(notif.mergeId.startsWith(`${POST_MERGE_ID}:`) || notif.mergeId.startsWith(`${MESSAGE_MERGE_ID}:`))) {
++			const groupKey = `${notif.mergeId}::${notif.reaction || ''}`;
++			if (!groups.has(groupKey)) {
++				groups.set(groupKey, []);
++			}
++			groups.get(groupKey).push(notif);
++		}
++	});
++
++	const removed = new Set();
++	groups.forEach((set) => {
++		if (set.length <= 1) {
++			return;
++		}
++		const target = set[0];
++		const names = [...new Set(set.map(n => n.user && n.user.displayname).filter(Boolean))]
++			.map(name => translator.escape(name));
++		if (!names.length) {
++			return;
++		}
++		const emojis = [...new Set(set.map(n => n.reaction).filter(Boolean))]
++			.slice(0, 5).map(name => `:${name}:`).join(' ');
++		const isPost = set[0].mergeId.startsWith(`${POST_MERGE_ID}:`);
++		const where = isPost ?
++			[target.topicTitle] :
++			[target.roomIcon, translator.escape(target.roomName || '')];
++		const baseKey = isPost ?
++			'reactions:notification.user-has-reacted-to-your-post-in-topic' :
++			'reactions:notification.user-has-reacted-to-your-message-in-room';
++
++		let key = baseKey;
++		let args = [names[0], emojis, ...where];
++		if (names.length === 2) {
++			key = `${baseKey}-two`;
++			args = [names[0], names[1], emojis, ...where];
++		} else if (names.length > 2) {
++			key = `${baseKey}-multiple`;
++			args = [names[0], names.length - 1, emojis, ...where];
++		}
++		target.bodyShort = translator.compile(key, ...args);
++		target.mergeCount = set.length;
++		set.slice(1).forEach(n => removed.add(n));
++	});
++	if (removed.size) {
++		data.notifications = data.notifications.filter(n => !removed.has(n));
++	}
++	return data;
++};
++
++// The forum's built-in upvote ("like", not our emoji reactions): when the voter takes the upvote back
++// (or switches it to a downvote), NodeBB core fires action:post.unvote but keeps the notification.
++// Core's notification id for it is `upvote:post:<pid>:uid:<voter>`.
++ReactionsPlugin.onUnvote = async function (data) {
++	try {
++		if (!data || data.current !== 'upvote' || !data.pid || !data.uid) {
++			return;
++		}
++		const settings = await loadPluginConfig();
++		if (!settings.deleteNotificationOnUnvote) {
++			return;
++		}
++		await notifications.rescind(`upvote:post:${data.pid}:uid:${data.uid}`);
++	} catch (e) {
++		console.error(e);
++	}
++};
++
++// Notification texts are stored with ":name:" shortcodes. After NodeBB translated them, swap the shortcodes
++// for the real emoji image (the HTML cannot travel through translator arguments, they are escaped).
++ReactionsPlugin.renderNotificationEmojis = async function (data) {
++	if (!data || !Array.isArray(data.notifications)) {
++		return data;
++	}
++	data.notifications.forEach((notif) => {
++		if (notif && notif.type === 'reaction' && typeof notif.bodyShort === 'string') {
++			try {
++				notif.bodyShort = notif.bodyShort.replace(/:([a-z0-9_+-]+):/gi, (whole, name) => {
++					const html = parse(name.toLowerCase());
++					return html || whole;
++				});
++			} catch (e) {
++				console.error(e);
++			}
++		}
++	});
++	return data;
++};
++
+ ReactionsPlugin.addNotificationFilters = async (data) => {
+ 	data.regularFilters.push({ name: '[[reactions:reactions]]', filter: 'reaction' });
+ 	return data;
+@@ -343,7 +461,53 @@ async function giveOwnerReactionReputation(reactionReputation, pid) {
+ 	}
+ }
+ 
++// When a user takes back a reaction, the notification that was sent to the author is deleted too.
++// Failing to delete it must never make removing the reaction itself fail.
++async function rescindReactionNotification(nid, enabled = true) {
++	if (!enabled) {
++		return;
++	}
++	try {
++		await notifications.rescind(nid);
++	} catch (e) {
++		console.error(e);
++	}
++}
++
++async function getReactionSetKey(socket, data) {
++	if (!socket.uid) {
++		throw new Error('[[error:not-logged-in]]');
++	}
++	if (!nameToEmoji(data.reaction)) {
++		throw new Error('[[reactions:error.invalid-reaction]]');
++	}
++	if (data.type === 'post') {
++		if (!await privileges.posts.can('topics:read', data.pid, socket.uid)) {
++			throw new Error('[[error:not-allowed]]');
++		}
++		return `pid:${data.pid}:reaction:${data.reaction}`;
++	} else if (data.type === 'message') {
++		const roomId = await messaging.getMessageField(data.mid, 'roomId');
++		if (!await messaging.canViewMessage(data.mid, roomId, socket.uid)) {
++			throw new Error('[[error:not-allowed]]');
++		}
++		return `mid:${data.mid}:reaction:${data.reaction}`;
++	}
++	throw new Error('[[error:invalid-data]]');
++}
++
+ SocketPlugins.reactions = {
++	// Setting for NodeBB's built-in upvote, shown on the core page "Settings > Reputation" (see public/acp-reputation.js).
++	getUnvoteSetting: async function (socket) {
++		await requireAdmin(socket);
++		const settings = await loadPluginConfig();
++		return { enabled: settings.deleteNotificationOnUnvote };
++	},
++	setUnvoteSetting: async function (socket, data) {
++		await requireAdmin(socket);
++		await meta.settings.setOne('reactions', 'deleteNotificationOnUnvote', data && data.enabled ? 'on' : 'off');
++		return { enabled: !!(data && data.enabled) };
++	},
+ 	addPostReaction: async function (socket, data) {
+ 		if (!socket.uid) {
+ 			throw new Error('[[error:not-logged-in]]');
+@@ -374,6 +538,10 @@ SocketPlugins.reactions = {
+ 		if (postData.deleted) {
+ 			throw new Error('[[reactions:error.post-deleted]]');
+ 		}
++		const isOwnPost = parseInt(postData.uid, 10) === parseInt(socket.uid, 10);
++		if (isOwnPost && !settings.allowSelfReactions) {
++			throw new Error('[[reactions:error.cannot-react-own-post]]');
++		}
+ 		data.uid = socket.uid;
+ 		data.tid = tid;
+ 		if (!emojiIsAlreadyExist) {
+@@ -397,7 +565,7 @@ SocketPlugins.reactions = {
+ 			db.setAdd(`pid:${data.pid}:reaction:${data.reaction}`, socket.uid),
+ 		]);
+ 
+-		if (!alreadyReacted && reactionReputation > 0) {
++		if (!alreadyReacted && reactionReputation > 0 && !isOwnPost) {
+ 			await giveOwnerReactionReputation(reactionReputation, data.pid);
+ 		}
+ 
+@@ -417,6 +585,9 @@ SocketPlugins.reactions = {
+ 				),
+ 				bodyLong: parsedPostData.content,
+ 				nid: `uid:${socket.uid}:pid:${data.pid}:reaction:${data.reaction}`,
++				mergeId: `${POST_MERGE_ID}:${data.pid}:${data.reaction}`,
++				reaction: data.reaction,
++				topicTitle: topicTitle,
+ 				pid: data.pid,
+ 				tid: data.tid,
+ 				from: socket.uid,
+@@ -439,7 +610,7 @@ SocketPlugins.reactions = {
+ 
+ 		const [settings, postFields, hasReacted, reactionReputation] = await Promise.all([
+ 			loadPluginConfig(),
+-			posts.getPostFields(data.pid, ['tid', 'deleted']),
++			posts.getPostFields(data.pid, ['tid', 'uid', 'deleted']),
+ 			db.isSetMember(`pid:${data.pid}:reaction:${data.reaction}`, socket.uid),
+ 			getReactionReputation(data.reaction),
+ 		]);
+@@ -458,13 +629,17 @@ SocketPlugins.reactions = {
+ 
+ 		if (hasReacted) {
+ 			await db.setRemove(`pid:${data.pid}:reaction:${data.reaction}`, socket.uid);
++			await rescindReactionNotification(
++				`uid:${socket.uid}:pid:${data.pid}:reaction:${data.reaction}`,
++				settings.deleteNotificationOnRemove
++			);
+ 		}
+ 
+ 		const reactionCount = await db.setCount(`pid:${data.pid}:reaction:${data.reaction}`);
+ 		if (reactionCount === 0) {
+ 			await db.setRemove(`pid:${data.pid}:reactions`, data.reaction);
+ 		}
+-		if (hasReacted && reactionReputation > 0) {
++		if (hasReacted && reactionReputation > 0 && parseInt(postFields.uid, 10) !== parseInt(socket.uid, 10)) {
+ 			await giveOwnerReactionReputation(-reactionReputation, data.pid);
+ 		}
+ 
+@@ -539,6 +714,9 @@ SocketPlugins.reactions = {
+ 				bodyLong: parsedMessage,
+ 				roomIcon: icon,
+ 				nid: `uid:${socket.uid}:mid:${data.mid}:reaction:${data.reaction}`,
++				mergeId: `${MESSAGE_MERGE_ID}:${data.mid}:${data.reaction}`,
++				reaction: data.reaction,
++				roomName: roomName,
+ 				mid: data.mid,
+ 				roomId: roomId,
+ 				from: socket.uid,
+@@ -574,6 +752,10 @@ SocketPlugins.reactions = {
+ 		data.roomId = roomId;
+ 		if (hasReacted) {
+ 			await db.setRemove(`mid:${data.mid}:reaction:${data.reaction}`, socket.uid);
++			await rescindReactionNotification(
++				`uid:${socket.uid}:mid:${data.mid}:reaction:${data.reaction}`,
++				settings.deleteNotificationOnRemove
++			);
+ 		}
+ 
+ 		const reactionCount = await db.setCount(`mid:${data.mid}:reaction:${data.reaction}`);
+@@ -584,27 +766,7 @@ SocketPlugins.reactions = {
+ 		await sendMessageEvent(data, 'event:reactions.removeMessageReaction');
+ 	},
+ 	getReactionUsernames: async function (socket, data) {
+-		if (!socket.uid) {
+-			throw new Error('[[error:not-logged-in]]');
+-		}
+-		if (!nameToEmoji(data.reaction)) {
+-			throw new Error('[[reactions:error.invalid-reaction]]');
+-		}
+-		let set;
+-		if (data.type === 'post') {
+-			if (!await privileges.posts.can('topics:read', data.pid, socket.uid)) {
+-				throw new Error('[[error:not-allowed]]');
+-			}
+-			set = `pid:${data.pid}:reaction:${data.reaction}`;
+-		} else if (data.type === 'message') {
+-			const roomId = await messaging.getMessageField(data.mid, 'roomId');
+-			if (!await messaging.canViewMessage(data.mid, roomId, socket.uid)) {
+-				throw new Error('[[error:not-allowed]]');
+-			}
+-			set = `mid:${data.mid}:reaction:${data.reaction}`;
+-		} else {
+-			throw new Error('[[error:invalid-data]]');
+-		}
++		const set = await getReactionSetKey(socket, data);
+ 		let uids = await db.getSetMembers(set);
+ 		const cutoff = 6;
+ 
+@@ -621,5 +783,17 @@ SocketPlugins.reactions = {
+ 			usernames,
+ 		};
+ 	},
++	getReactionUsers: async function (socket, data) {
++		const set = await getReactionSetKey(socket, data);
++		const uids = await db.getSetMembers(set);
++		const users = await user.getUsersFields(
++			uids.slice(0, MAX_USERS_IN_FULL_LIST),
++			['uid', 'username', 'userslug', 'picture', 'icon:text', 'icon:bgColor'],
++		);
++		return {
++			total: uids.length,
++			users: users.filter(u => u && parseInt(u.uid, 10) > 0),
++		};
++	},
+ };
+ 
+diff --git a/plugin.json b/plugin.json
+index 552f792..b92b403 100644
+--- a/plugin.json
++++ b/plugin.json
+@@ -12,6 +12,9 @@
+     "scripts": [
+         "public/client.js"
+     ],
++    "acpScripts": [
++        "public/acp-reputation.js"
++    ],
+     "modules": {
+         "../admin/plugins/reactions.js": "./public/admin.js"
+     },
+@@ -24,6 +27,9 @@
+         { "hook": "filter:messaging.getMessages", "method": "getMessageReactions" },
+         { "hook": "filter:post.get", "method": "onReply" },
+         { "hook": "action:posts.purge", "method": "deleteReactions" },
++        { "hook": "filter:notifications.merge", "method": "mergeReactionNotifications" },
++        { "hook": "filter:user.notifications.getNotifications", "method": "renderNotificationEmojis" },
++        { "hook": "action:post.unvote", "method": "onUnvote" },
+         { "hook": "filter:notifications.addFilters", "method": "addNotificationFilters" },
+         { "hook": "filter:user.notificationTypes", "method": "notificationTypes" }
+     ]
+diff --git a/public/acp-reputation.js b/public/acp-reputation.js
+new file mode 100644
+index 0000000..244927f
+--- /dev/null
++++ b/public/acp-reputation.js
+@@ -0,0 +1,56 @@
++'use strict';
++
++// Adds one switch to the core ACP page "Settings > Reputation & Flags" (where NodeBB's own upvote settings live):
++// delete the author's notification when a built-in upvote ("like") is taken back.
++// It saves immediately (it does not use that page's Save button) into this plugin's own settings.
++(function () {
++	const FIELD_ID = 'reactions-delete-notification-on-unvote';
++
++	function addSwitch() {
++		const $block = $('#reputation-settings');
++		if (!$block.length || $('#' + FIELD_ID).length) {
++			return;
++		}
++		require(['translator', 'alerts'], function (translator, alerts) {
++			const keys = [
++				'[[reactions:settings.delete-notification-on-unvote]]',
++				'[[reactions:settings.delete-notification-on-unvote-help]]',
++				'[[reactions:settings.saved-title]]',
++				'[[reactions:settings.saved-message]]',
++			];
++			Promise.all(keys.map(function (key) { return translator.translate(key); })).then(function (text) {
++				if ($('#' + FIELD_ID).length) {
++					return;
++				}
++				const $wrap = $('<div class="form-check form-switch mt-3 mb-3"></div>');
++				const $input = $('<input type="checkbox" class="form-check-input">').attr('id', FIELD_ID).prop('disabled', true);
++				const $label = $('<label class="form-check-label"></label>').attr('for', FIELD_ID).text(text[0]);
++				const $help = $('<p class="form-text"></p>').text(text[1]);
++				$wrap.append($input, $label, $help);
++				$block.append($wrap);
++
++				socket.emit('plugins.reactions.getUnvoteSetting', function (err, res) {
++					if (err) {
++						return alerts.error(err);
++					}
++					$input.prop('checked', !!res.enabled).prop('disabled', false);
++				});
++				$input.on('change', function () {
++					const enabled = $input.prop('checked');
++					socket.emit('plugins.reactions.setUnvoteSetting', { enabled: enabled }, function (err) {
++						if (err) {
++							$input.prop('checked', !enabled);
++							return alerts.error(err);
++						}
++						alerts.alert({ type: 'success', alert_id: 'reactions-unvote-saved', title: text[2], message: text[3], timeout: 2500 });
++					});
++				});
++			});
++		});
++	}
++
++	require(['hooks'], function (hooks) {
++		hooks.on('action:ajaxify.end', addSwitch);
++	});
++	$(addSwitch);
++}());
+diff --git a/public/admin.js b/public/admin.js
+index 89aafee..1dd0230 100644
+--- a/public/admin.js
++++ b/public/admin.js
+@@ -68,8 +68,8 @@ define('admin/plugins/reactions', [
+ 				alerts.alert({
+ 					type: 'success',
+ 					alert_id: 'reactions-saved',
+-					title: 'Settings Saved',
+-					message: 'Reactions plugin settings saved',
++					title: '[[reactions:settings.saved-title]]',
++					message: '[[reactions:settings.saved-message]]',
+ 					timeout: 3000,
+ 				});
+ 			});
+diff --git a/public/client.js b/public/client.js
+index 383fa7d..738d50a 100644
+--- a/public/client.js
++++ b/public/client.js
+@@ -12,8 +12,13 @@ $(document).ready(function () {
+ 			hooks.on('action:ajaxify.end', function () {
+ 				if (ajaxify.data.template.topic) {
+ 					setupPostReactions();
++					hideOwnPostReactionButtons();
+ 				}
+ 			});
++			// posts that are loaded dynamically (infinite scroll, new replies)
++			hooks.on('action:posts.loaded', function () {
++				hideOwnPostReactionButtons();
++			});
+ 			// switchChat uses action:chat.loaded and not action:ajaxify.end
+ 			hooks.on('action:chat.loaded', function (container) {
+ 				if (ajaxify.data.template.chats && ajaxify.data.roomId) {
+@@ -41,14 +46,70 @@ $(document).ready(function () {
+ 		});
+ 	}
+ 
++	function isOwnPost(el) {
++		if (!app.user || !app.user.uid || config.allowSelfReactions) {
++			return false;
++		}
++		const postUid = $(el).closest('[component="post"]').attr('data-uid');
++		return parseInt(postUid, 10) === parseInt(app.user.uid, 10);
++	}
++
++	// the post owner can't add reactions to their own post (enforced on the server too)
++	function hideOwnPostReactionButtons() {
++		$('[component="post/reaction/add"]').each(function () {
++			if (isOwnPost(this)) {
++				$(this).addClass('own-post');
++			}
++		});
++	}
++
++	// Opens a dialog with everyone who used this reaction (avatars + links to profiles)
++	function openAllUsersModal($el) {
++		const pid = $el.attr('data-pid');
++		const mid = $el.attr('data-mid');
++		const reaction = $el.attr('data-reaction');
++		const type = pid ? 'post' : 'message';
++		socket.emit('plugins.reactions.getReactionUsers', {
++			type: type,
++			pid: pid,
++			mid: mid,
++			reaction: reaction,
++		}).then(function (result) {
++			app.parseAndTranslate('partials/reactions/users-list', {
++				users: result.users,
++				total: result.total,
++				emojiHtml: $el.find('.emoji').first().prop('outerHTML') || '',
++			}, function (html) {
++				require(['modals'], function (modals) {
++					modals.dialog({
++						title: '[[reactions:users-who-reacted]]',
++						message: html,
++						onEscape: true,
++						backdrop: true,
++						buttons: {
++							close: { label: '[[modules:bootbox.ok]]', className: 'btn-primary' },
++						},
++					});
++				});
++			});
++		}).catch(function (err) {
++			if (alerts) {
++				alerts.error(err.message);
++			}
++		});
++	}
++
+ 	function setupPostReactions() {
+ 		setupPostReactionSockets();
+ 
+-		$('[component="topic"]').on('click', '[component="post/reaction"]', function () {
++		$('[component="topic"]').off('click.reactions').on('click.reactions', '[component="post/reaction"]', function () {
+ 			const reactionElement = $(this);
+ 			const pid = reactionElement.attr('data-pid');
+ 			const reaction = reactionElement.attr('data-reaction');
+ 			const reacted = reactionElement.hasClass('reacted');
++			if (!reacted && isOwnPost(reactionElement)) {
++				return alerts.error('[[reactions:error.cannot-react-own-post]]');
++			}
+ 			const event = 'plugins.reactions.' + (reacted ? 'removePostReaction' : 'addPostReaction');
+ 			socket.emit(event, {
+ 				pid: pid,
+@@ -60,8 +121,11 @@ $(document).ready(function () {
+ 			});
+ 		});
+ 
+-		$('[component="topic"]').on('click', '[component="post/reaction/add"]', function () {
++		$('[component="topic"]').off('click.reactionsAdd').on('click.reactionsAdd', '[component="post/reaction/add"]', function () {
+ 			const reactionAddEl = $(this);
++			if (isOwnPost(reactionAddEl)) {
++				return;
++			}
+ 			const pid = reactionAddEl.attr('data-pid');
+ 			const allowed = Array.isArray(config.allowedPostReactions) ? config.allowedPostReactions : [];
+ 
+@@ -238,19 +302,24 @@ $(document).ready(function () {
+ 					}
+ 				}
+ 			}
+-			async function createTooltip(data) {
+-				const el = mouseOverReactionEl;
+-				disposeTooltip(el);
+-				let usernames = data.usernames.filter(name => name !== '[[global:former_user]]');
++			async function getUsernamesText(data) {
++				const usernames = data.usernames.filter(name => name !== '[[global:former_user]]');
+ 				if (!usernames.length) {
+-					return;
++					return '';
+ 				}
+ 				if (usernames.length + data.otherCount > data.cutoff) {
+-					usernames = await translator.translate(
++					return translator.translate(
+ 						translator.compile('topic:users-and-others', usernames.join(', '), data.otherCount),
+ 					);
+-				} else {
+-					usernames = usernames.join(', ');
++				}
++				return usernames.join(', ');
++			}
++			async function createTooltip(data) {
++				const el = mouseOverReactionEl;
++				disposeTooltip(el);
++				const usernames = await getUsernamesText(data);
++				if (!usernames) {
++					return;
+ 				}
+ 
+ 				el.attr('title', usernames);
+@@ -303,6 +372,246 @@ $(document).ready(function () {
+ 					mouseOverReactionEl = null;
+ 					disposeTooltip($(this));
+ 				});
++				// right click = full list of users
++				$('body').on('contextmenu', '.reaction', function (e) {
++					e.preventDefault();
++					clearTooltipTimeout();
++					disposeTooltip($(this));
++					openAllUsersModal($(this));
++				});
++			} else {
++				setupLongPressUsersPopup(getUsernamesText, translator);
++			}
++		});
++	}
++
++	// Touch devices have no hover, so a long press on a reaction opens a popup with the
++	// users who reacted. It stays open until the user taps somewhere else, so it survives
++	// the browser's own long-press UI (e.g. the "image options" dialog) being opened and closed.
++	function setupLongPressUsersPopup(getUsernamesText, translator) {
++		const LONG_PRESS_MS = 450;
++		const MOVE_TOLERANCE_PX = 10;
++		const IGNORE_CLOSE_MS = 350;
++		let usersPopupEl = null;
++		let popupToken = 0;
++		let longPressTimeoutId = 0;
++		let longPressStart = null;
++		let tapStart = null;
++		let lastTouchStartTime = 0;
++		let lastTouchEndTime = 0;
++		let suppressNextClick = false;
++		let popupRequested = false;
++
++		function decodeEntities(str) {
++			return new DOMParser().parseFromString(String(str), 'text/html').documentElement.textContent;
++		}
++
++		function clearLongPressTimeout() {
++			if (longPressTimeoutId) {
++				clearTimeout(longPressTimeoutId);
++				longPressTimeoutId = 0;
++			}
++			longPressStart = null;
++		}
++
++		function closeUsersPopup() {
++			popupToken += 1;
++			popupRequested = false;
++			tapStart = null;
++			if (usersPopupEl) {
++				usersPopupEl.remove();
++				usersPopupEl = null;
++			}
++			$(document).off('.reactionsUsersPopup');
++		}
++
++		function positionUsersPopup($popup, $anchor) {
++			const offset = $anchor.offset();
++			const anchorCenter = offset.left + ($anchor.outerWidth() / 2);
++			const popupW = $popup.outerWidth();
++			const popupH = $popup.outerHeight();
++			const winW = $(window).width();
++
++			const left = Math.max(8, Math.min(anchorCenter - (popupW / 2), winW - popupW - 8));
++			let top = offset.top - popupH - 8;
++			const below = top < $(window).scrollTop() + 4;
++			if (below) {
++				top = offset.top + $anchor.outerHeight() + 8;
++			}
++			$popup.toggleClass('below', below);
++			$popup.css({ top: top, left: left });
++			$popup.find('.reactions-users-popup-arrow').css(
++				'left',
++				Math.max(10, Math.min(anchorCenter - left, popupW - 10)) + 'px',
++			);
++		}
++
++		async function showUsersPopup($el) {
++			const pid = $el.attr('data-pid');
++			const mid = $el.attr('data-mid');
++			const reaction = $el.attr('data-reaction');
++			const type = pid ? 'post' : 'message';
++
++			// the finger is still down (or just released): don't let it toggle the reaction
++			suppressNextClick = true;
++			closePopupAndReset();
++			popupRequested = true;
++
++			const token = popupToken;
++			let data;
++			try {
++				data = await socket.emit('plugins.reactions.getReactionUsernames', {
++					type: type,
++					mid: mid,
++					pid: pid,
++					reaction: reaction,
++				});
++			} catch (err) {
++				if (token === popupToken) {
++					popupRequested = false;
++					if (alerts) {
++						alerts.error(err.message);
++					}
++				}
++				return;
++			}
++			if (token !== popupToken) {
++				return;
++			}
++			const text = await getUsernamesText(data);
++			if (token !== popupToken) {
++				return;
++			}
++			if (!text || !$el.closest('body').length) {
++				popupRequested = false;
++				return;
++			}
++
++			const $popup = $(
++				'<div class="reactions-users-popup" role="tooltip">' +
++				'<div class="reactions-users-popup-inner"></div>' +
++				'<div class="reactions-users-popup-arrow"></div>' +
++				'</div>'
++			);
++			$popup.find('.reactions-users-popup-inner').text(decodeEntities(text));
++			if (data.otherCount > 0) {
++				const label = await translator.translate('[[reactions:show-all-users]]');
++				if (token !== popupToken) {
++					return;
++				}
++				$('<a href="#" class="reactions-users-popup-all"></a>').text(label).appendTo(
++					$popup.find('.reactions-users-popup-inner'),
++				);
++				$popup.on('click', '.reactions-users-popup-all', function (e) {
++					e.preventDefault();
++					e.stopPropagation();
++					closePopupAndReset();
++					openAllUsersModal($el);
++				});
++			}
++			$('body').append($popup);
++			positionUsersPopup($popup, $el);
++			usersPopupEl = $popup;
++
++			// Close only on a real tap (not a scroll) elsewhere. Listeners are attached a moment
++			// later so the release of the long press itself can't close the popup.
++			setTimeout(function () {
++				if (token !== popupToken) {
++					return;
++				}
++				tapStart = null;
++				$(document).on('touchstart.reactionsUsersPopup', function (e) {
++					const t = e.originalEvent.touches[0];
++					tapStart = t ? { x: t.clientX, y: t.clientY } : null;
++				});
++				$(document).on('touchend.reactionsUsersPopup', function (e) {
++					if ($(e.target).closest('.reactions-users-popup-all').length) {
++						tapStart = null;
++						return;
++					}
++					const t = e.originalEvent.changedTouches[0];
++					if (tapStart && t &&
++						Math.abs(t.clientX - tapStart.x) < MOVE_TOLERANCE_PX &&
++						Math.abs(t.clientY - tapStart.y) < MOVE_TOLERANCE_PX) {
++						closePopupAndReset();
++					}
++					tapStart = null;
++				});
++				// mouse / emulated mouse events (ignore the ones synthesized right after a touch)
++				$(document).on('mousedown.reactionsUsersPopup', function (e) {
++					if ($(e.target).closest('.reactions-users-popup-all').length) {
++						return;
++					}
++					if (Date.now() - lastTouchEndTime > 700) {
++						closePopupAndReset();
++					}
++				});
++				$(document).on('keydown.reactionsUsersPopup', function (e) {
++					if (e.key === 'Escape') {
++						closePopupAndReset();
++					}
++				});
++			}, IGNORE_CLOSE_MS);
++		}
++
++		function closePopupAndReset() {
++			clearLongPressTimeout();
++			closeUsersPopup();
++		}
++
++		// a new touch always starts clean
++		document.addEventListener('touchstart', function () {
++			lastTouchStartTime = Date.now();
++			suppressNextClick = false;
++		}, true);
++		document.addEventListener('touchend', function () {
++			lastTouchEndTime = Date.now();
++		}, true);
++
++		// swallow the click that the end of a long press may produce
++		document.addEventListener('click', function (e) {
++			if (suppressNextClick) {
++				suppressNextClick = false;
++				if (e.target.closest && e.target.closest('.reaction')) {
++					e.preventDefault();
++					e.stopPropagation();
++				}
++			}
++		}, true);
++
++		$('body').on('touchstart', '.reaction', function (e) {
++			const t = e.originalEvent.touches[0];
++			clearLongPressTimeout();
++			if (!t || e.originalEvent.touches.length > 1) {
++				return;
++			}
++			const $el = $(this);
++			longPressStart = { x: t.clientX, y: t.clientY };
++			longPressTimeoutId = setTimeout(function () {
++				longPressTimeoutId = 0;
++				showUsersPopup($el);
++			}, LONG_PRESS_MS);
++		});
++		$('body').on('touchmove', '.reaction', function (e) {
++			const t = e.originalEvent.touches[0];
++			if (longPressStart && t &&
++				(Math.abs(t.clientX - longPressStart.x) > MOVE_TOLERANCE_PX ||
++				Math.abs(t.clientY - longPressStart.y) > MOVE_TOLERANCE_PX)) {
++				clearLongPressTimeout();
++			}
++		});
++		$('body').on('touchend touchcancel', '.reaction', clearLongPressTimeout);
++
++		// On Android the long press fires "contextmenu" (the browser's image/link menu).
++		// Treat it as the long-press signal and cancel the native menu where the browser allows it.
++		$('body').on('contextmenu', '.reaction', function (e) {
++			if (Date.now() - lastTouchStartTime > 1500) {
++				return; // a real mouse right-click, leave it alone
++			}
++			e.preventDefault();
++			clearLongPressTimeout();
++			if (!popupRequested) {
++				showUsersPopup($(this));
+ 			}
+ 		});
+ 	}
+diff --git a/scss/reactions.scss b/scss/reactions.scss
+index 1f31283..9c3ec86 100644
+--- a/scss/reactions.scss
++++ b/scss/reactions.scss
+@@ -1,8 +1,18 @@
+ .reactions {
+ 	display: flex;
+-	flex-wrap: wrap;
++	flex-wrap: wrap !important; // many emojis always continue on a new row instead of widening the page
+ 	gap: 0.25rem;
++	// Wraps inside its parent; as a hard stop it is never wider than the screen, even if a parent has no width limit.
++	min-width: 0;
++	max-width: 100%;
++	max-width: calc(100vw - 2rem);
++	box-sizing: border-box;
++	white-space: normal;
+ 	.reaction {
++		flex: 0 0 auto;
++		max-width: 100%;
++		box-sizing: border-box;
++		white-space: nowrap;
+ 		border: 1px solid var(--bs-primary-bg-subtle);
+ 		display: inline-block;
+ 		border-radius: 4px;
+@@ -28,12 +38,78 @@
+ 		}
+ 	}
+ 	.reaction-add {
+-		&.max-reactions {
++		flex: 0 0 auto;
++		&.max-reactions,
++		&.own-post {
+ 			display: none !important;
+ 		}
+ 	}
+ }
+ 
++// Touch devices (no hover): the emoji image must not be the long-press target,
++// otherwise the browser opens its "image options" menu instead of our users popup.
++@media (pointer: coarse) {
++	.reactions .reaction {
++		-webkit-touch-callout: none;
++		-webkit-user-select: none;
++		user-select: none;
++		-webkit-tap-highlight-color: transparent;
++
++		img,
++		.emoji {
++			pointer-events: none;
++			-webkit-user-drag: none;
++		}
++	}
++}
++
++// Popup listing who reacted (long-press on touch devices). Looks like the desktop tooltip.
++.reactions-users-popup {
++	position: absolute;
++	z-index: 2100;
++	display: block;
++	max-width: min(240px, calc(100vw - 16px));
++	font-size: 0.875rem;
++	text-align: center;
++	word-wrap: break-word;
++	opacity: 0.95;
++	-webkit-touch-callout: none;
++	-webkit-user-select: none;
++	user-select: none;
++
++	.reactions-users-popup-inner {
++		padding: 0.25rem 0.5rem;
++		color: var(--bs-tooltip-color, #fff);
++		background-color: var(--bs-tooltip-bg, #000);
++		border-radius: var(--bs-tooltip-border-radius, 0.375rem);
++	}
++
++	.reactions-users-popup-arrow {
++		position: absolute;
++		bottom: -0.4rem;
++		width: 0;
++		height: 0;
++		transform: translateX(-50%);
++		border-style: solid;
++		border-width: 0.4rem 0.4rem 0;
++		border-color: var(--bs-tooltip-bg, #000) transparent transparent;
++	}
++
++	.reactions-users-popup-all {
++		display: block;
++		margin-top: 0.25rem;
++		color: inherit;
++		text-decoration: underline;
++	}
++
++	&.below .reactions-users-popup-arrow {
++		bottom: auto;
++		top: -0.4rem;
++		border-width: 0 0.4rem 0.4rem;
++		border-color: transparent transparent var(--bs-tooltip-bg, #000);
++	}
++}
++
+ .reactions-allowed-picker {
+ 	position: absolute;
+ 	z-index: 2000;
+@@ -114,3 +190,8 @@
+ 		font-weight: bold;
+ 	}
+ }
++
++.reactions-users-list {
++	max-height: 60vh;
++	overflow-y: auto;
++}
+diff --git a/templates/admin/plugins/reactions.tpl b/templates/admin/plugins/reactions.tpl
+index a11f651..4d60ba9 100644
+--- a/templates/admin/plugins/reactions.tpl
++++ b/templates/admin/plugins/reactions.tpl
+@@ -22,6 +22,13 @@
+ 							{{tx("reactions:settings.max-reactions-per-user-per-post-help")}}
+ 						</p>
+ 					</div>
++					<div class="form-check form-switch mb-3">
++						<input id="allowSelfReactions" name="allowSelfReactions" type="checkbox" class="form-check-input">
++						<label for="allowSelfReactions" class="form-check-label">{{tx("reactions:settings.allow-self-reactions")}}</label>
++						<p class="form-text">
++							{{tx("reactions:settings.allow-self-reactions-help")}}
++						</p>
++					</div>
+ 					<hr/>
+ 					<div class="form-check form-switch mb-3">
+ 						<input id="enableMessageReactions" name="enableMessageReactions" type="checkbox" class="form-check-input">
+@@ -41,6 +48,17 @@
+ 					</div>
+ 				</div>
+ 
++				<div class="mb-3">
++					<h5 class="fw-bold tracking-tight settings-header">{{tx("reactions:settings.notifications-title")}}</h5>
++					<div class="form-check form-switch mb-3">
++						<input id="deleteNotificationOnRemove" name="deleteNotificationOnRemove" type="checkbox" class="form-check-input">
++						<label for="deleteNotificationOnRemove" class="form-check-label">{{tx("reactions:settings.delete-notification-on-remove")}}</label>
++						<p class="form-text">
++							{{tx("reactions:settings.delete-notification-on-remove-help")}}
++						</p>
++					</div>
++				</div>
++
+ 				<div class="mb-3">
+ 					<h5 class="fw-bold tracking-tight settings-header">{{tx("reactions:settings.allowed-post-reactions")}}</h5>
+ 					<p class="form-text">
+diff --git a/templates/partials/reactions/users-list.tpl b/templates/partials/reactions/users-list.tpl
+new file mode 100644
+index 0000000..2f1daf0
+--- /dev/null
++++ b/templates/partials/reactions/users-list.tpl
+@@ -0,0 +1,16 @@
++<div class="reactions-users-modal">
++	<div class="d-flex align-items-center gap-2 mb-2">
++		{{emojiHtml}}
++		<span class="text-muted">{total}</span>
++	</div>
++	<ul class="list-unstyled mb-0 reactions-users-list">
++		{{{ each users }}}
++		<li class="py-1">
++			<a class="d-flex align-items-center gap-2 text-decoration-none" href="{config.relative_path}/user/{./userslug}">
++				{{buildAvatar(users, "28px", true)}}
++				<span class="fw-semibold">{./username}</span>
++			</a>
++		</li>
++		{{{ end }}}
++	</ul>
++</div>
+diff --git a/templates/partials/topic/reactions.tpl b/templates/partials/topic/reactions.tpl
+index 4f2e181..c888f94 100644
+--- a/templates/partials/topic/reactions.tpl
++++ b/templates/partials/topic/reactions.tpl
+@@ -4,7 +4,7 @@
+     <!-- IMPORT partials/topic/reaction.tpl -->
+   {{{ end }}}
+   {{{ if !./deleted }}}
+-  <a href="#" class="reaction-add btn btn-ghost btn-sm {{{ if ./maxReactionsReached }}}max-reactions{{{ end }}}" component="post/reaction/add" data-pid="{./pid}" title="{{tx("reactions:add-reaction")}}">
++  <a href="#" class="reaction-add btn btn-ghost btn-sm {{{ if ./maxReactionsReached }}}max-reactions{{{ end }}} {{{ if !config.allowSelfReactions }}}{{{ if ./selfPost }}}own-post{{{ end }}}{{{ end }}}" component="post/reaction/add" data-pid="{./pid}" title="{{tx("reactions:add-reaction")}}">
+     <i class="fa fa-face-smile text-primary"></i>
+   </a>
+   {{{ end }}}
