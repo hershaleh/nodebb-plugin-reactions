@@ -38,7 +38,7 @@ The package keeps the original name (`@clickandgo/nodebb-plugin-reactions`), so 
 - **Notification is deleted when a reaction is removed.** When a user takes back their emoji reaction, the notification sent to the author is deleted. Switch: *Plugin settings > Notifications > "Delete the notification when the reaction is removed"* (applies to posts and chats, on by default).
 - **Notification is deleted when a built-in upvote is removed.** This is about NodeBB's own upvote ("like") button, not the emoji reactions. Switch: *ACP > Settings > Reputation & Flags > "Delete the notification when an upvote ("like") is removed"* (on by default). It is saved immediately, without the page's Save button.
 - **Many reactions stay on screen.** The reactions row wraps onto new lines and never grows wider than the screen or its column, on desktop and mobile.
-- **Complete Hebrew translation** of the admin panel and notification type (other languages fall back to English for the new strings).
+- **Complete Hebrew translation** of the admin panel and notification type The new strings exist in English and Hebrew only; other languages have not been translated yet.
 
 ## Emojis in topic titles and notifications
 
